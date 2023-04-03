@@ -23,16 +23,22 @@ num_sent = int(input())
 sents = [deque(input().split()) for _ in range(num_sent)]
 mix_sent = deque(input().split())
 
+possible = True
 for mix_word in mix_sent:
-    possible = False
-    print(sents)
+    found = False
     for ns in range(num_sent):
-        if sents[ns] and mix_word == sents[ns][0]:
-            sents[ns].popleft()
-            possible = True
-            break
-    if not possible:
-        print("Impossible")
+        if sents[ns]:
+            if mix_word == sents[ns][0]:
+                sents[ns].popleft()
+                found = True
+                break
+        else:
+            continue
+    if not found:
+        possible = False
         break
-if possible:
+
+if possible and all(not sent for sent in sents):
     print("Possible")
+else:
+    print("Impossible")
