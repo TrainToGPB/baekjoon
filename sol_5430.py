@@ -28,15 +28,25 @@ input = sys.stdin.readline
 
 num_case = int(input())
 for _ in range(num_case):
-    func, series_len, series = input()[:-1], int(input()), deque(eval(input()))
+    func, series_len, series = input().rstrip(), int(input()), deque(eval(input()))
+    is_reverse = False
+    is_error = False
     for f in func:
         if f == 'R':
-            series.reverse()
+            is_reverse = not is_reverse
         elif f == 'D':
             try:
-                series.popleft()
+                if is_reverse:
+                    series.pop()
+                else:
+                    series.popleft()
             except IndexError:
-                print('error')
+                is_error = True
                 break
-    if series:
-        print(list(series))
+    if is_error:
+        result = 'error'
+    else:
+        result = list(series)
+        if is_reverse:
+            result.reverse()
+    print(result)
