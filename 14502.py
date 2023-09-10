@@ -52,64 +52,44 @@
 [출력]
 첫째 줄에 얻을 수 있는 안전 영역의 최대 크기를 출력한다.
 """
-from itertools import combinations_with_replacement
+from itertools import combinations
+from copy import deepcopy
 
 # TODO: 연구소 지도 입력받기
 height, width = map(int, input().split())
-lab_map = []
-visited_original = []
-virus_coors = []
-for h_idx in range(height):
-    lab_row = list(map(int, input().split()))
-    lab_map.append(lab_row)
-    visited_original_row = []
-    for w_idx, w in enumerate(lab_row):
-        if w == 0:
-            visited_original_row.append(False)
-        elif w == 1:
-            visited_original_row.append(True)
-        elif w == 2:
-            visited_original_row.append(True)
-            virus_coors.append([h_idx, w_idx])
-        visited_original.append(visited_original_row)
+lab_map = [list(map(int, input().split())) for _ in range(height)]
+virus_coors, wall_coors = [], []
+for i in range(height):
+    for j in range(width):
+        if lab_map[i][j] == 2:
+            virus_coors.append((j, i))
+        elif lab_map[i][j] == 0:
+            wall_coors.append((j, i))
 
-# TODO: DFS definition
-def dfs_virus(position, visited):
+# TODO: DFS
+def dfs_virus(virus_coor, lab_map):
     dxs, dys = [-1, 1, 0, 0], [0, 0, -1, 1]
     for dx, dy in zip(dxs, dys):
-        position[0] += dx
-        position[1] += dy
-        if not visited[position[0]][position[1]]:
-            visited[position[0]][position[1]] = True
-            dfs_virus(position, visited)
+        nx, ny = virus_coor[0] + dx, virus_coor[1] + dy
+        if nx < 0 or nx >= width or ny < 0 or ny >= height:
+            continue
+        if lab_map[ny][nx] == 0:
+            lab_map[ny][nx] = 2
+            dfs_virus((nx, ny), lab_map)
 
-# TODO: 벽 세울 곳 3개 선택(아마 combinations)
-possible_xs = combinations_with_replacement(range(height), 3)
-possible_ys = combinations_with_replacement(range(width), 3)
+
+# TODO: 벽 3개 세우기(combinations_with_replacement)
 max_safe = 0
-for xs in possible_xs:
-    for ys in possible_ys:
-        c1, c2, c3 = [xs[0], ys[0]], [xs[1], ys[1]], [xs[2], ys[2]]
-        if c1 == c2 or c2 == c3 or c3 == c1:
-            continue
-        if lab_map[c1[0]][c1[1]] != 0 or lab_map[c2[0]][c2[1]] != 0 or lab_map[c3[0]][c3[1]] != 0:
-            continue
-        print(xs, ys)
-        # TODO: 바이러스로부터 DFS or BFS해서 안전 영역 넓이 계산
-        visited = visited_original.copy()
-        visited[c1[0]][c1[1]] = True
-        visited[c2[0]][c2[1]] = True
-        visited[c3[0]][c3[1]] = True
-        for vc in virus_coors:
-            dfs_virus(vc, visited)
+for walls in combinations(wall_coors, 3):
+    lab_map_temp = deepcopy(lab_map)
+    for wall in walls:
+        lab_map_temp[wall[1]][wall[0]] = 1
+    for virus_coor in virus_coors:
+        dfs_virus(virus_coor, lab_map_temp)
 
-            # TODO: 최대 안전 영역 넓이 도출
-            safe = 0
-            for visited_row in visited:
-                safe += visited_row.count(False)
-            # print(safe)
-        
-        if safe > max_safe:
-            max_safe = safe
+    # TODO: 안전지역 넓이 확인
+    temp_safe = sum(sum(1 for _ in row if _ == 0) for row in lab_map_temp)
+    if temp_safe > max_safe:
+        max_safe = temp_safe
 
 print(max_safe)
