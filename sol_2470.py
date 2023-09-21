@@ -24,30 +24,43 @@ N개의 용액들의 특성값은 모두 다르고, 산성 용액만으로나 �
 출력해야 하는 두 용액은 특성값의 오름차순으로 출력한다. 
 특성값이 0에 가장 가까운 용액을 만들어내는 경우가 두 개 이상일 경우에는 그 중 아무것이나 하나를 출력한다.
 """
-n = int(input())
-solutions = list(map(int, input().split()))
+from collections import deque
 
-acids, alkalis = [], []
-for solution in solutions:
-    if solution > 0:
-        acids.append(solution)
-    elif solution < 0:
-        alkalis.append(solution)
-acids.sort(reverse=True)
-alkalis.sort()
 
-acid, alkali = acids.pop(), alkalis.pop()
-best_acid, best_alkali = acid, alkali
-mixed_ph = best_acid + best_alkali
-while mixed_ph != 0 and acids and alkalis:
-    if mixed_ph > 0:
-        acid = acids.pop()
-    elif mixed_ph < 0:
-        alkali = alkalis.pop()
-    new_mixed_ph = acid + alkali
-    if abs(new_mixed_ph) < abs(mixed_ph):
-        mixed_ph = new_mixed_ph
-        best_acid, best_alkali = acid, alkali
-    print(acid, alkali)
+def get_neutral_mix(solutions):
+    if solutions[0] >= 0:
+        return [solutions[0], solutions[1]]
+    if solutions[-1] <= 0:
+        return [solutions[-2], solutions[-1]]
 
-print(best_acid, best_alkali)
+    mix = deque([solutions.popleft(), solutions.pop()])
+
+    best_feature = sum(mix)
+    best_mix = mix.copy()
+    if sum(mix) == 0:
+        return best_mix
+    
+    while solutions:
+        if abs(mix[0]) < abs(mix[1]):
+            mix.pop()
+            mix.append(solutions.pop())
+        elif abs(mix[0]) > abs(mix[1]):
+            mix.popleft()
+            mix.appendleft(solutions.popleft())
+        else:
+            return list(mix)
+            
+        mixed_feature = sum(mix)
+        if abs(mixed_feature) < abs(best_feature):
+            best_feature = mixed_feature
+            best_mix = mix.copy()
+
+    return list(best_mix)
+
+
+if __name__ == "__main__":
+    n = int(input())
+    solutions = deque(sorted(map(int, input().split())))
+
+    best_mix = get_neutral_mix(solutions)
+    print(*best_mix)
