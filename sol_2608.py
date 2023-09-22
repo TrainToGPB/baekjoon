@@ -37,48 +37,48 @@ MCMXL = 1000 + 900 + 40 = 1940
 [출력]
 입력으로 주어진 두 수를 더한 값을 첫째 줄에 아라비아숫자로 출력하고 둘째 줄에는 로마 숫자로 출력한다.
 """
-rom_num1 = input()
-rom_num2 = input()
+from collections import deque
 
-roms = ['I', 'IV', 'V', 'IX', 'X', 'XL', 'L', 'XC', 'C', 'CD', 'D', 'CM', 'M']
-aras = [1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000]
-rom2ara = {rom: ara for rom, ara in zip(roms, aras)}
-ara2rom = {ara: rom for rom, ara in zip(roms, aras)}
 
-def rome2arabian(rom_num):
-    ara_num = 0
-    tmp = ''
-    for i, rn in enumerate(rom_num):
-        if not tmp:
-            if rn in ['I', 'X', 'C']:
-                tmp += rn
-                if i == len(rom_num) - 1:
-                    ara_num += rom2ara[tmp]
-                    tmp = ''
-            else:
-                ara_num += rom2ara[rn]
-        else:
-            if tmp + rn in roms:
-                tmp += rn        
-            else:
-                ara_num += rom2ara[rn]
-            ara_num += rom2ara[tmp]
-            tmp = ''
-    return ara_num
+def rome_to_arabian(num_rome):
+    num_arab = 0
+    while num_rome:
+        num_rome_temp = '' + num_rome.popleft()
+        if num_rome_temp == 'I':
+            if num_rome and num_rome[0] in 'VX':
+                num_rome_temp += num_rome.popleft()
+        elif num_rome_temp == 'X':
+            if num_rome and num_rome[0] in 'LC':
+                num_rome_temp += num_rome.popleft()
+        elif num_rome_temp == 'C':
+            if num_rome and num_rome[0] in 'DM':
+                num_rome_temp += num_rome.popleft()
 
-def arabian2rome(ara_num):
-    ara_num_tmp = ara_num
-    rom_num = ''
-    while ara_num_tmp > 0:
-        for ara in aras[::-1]:
-            if ara_num_tmp >= ara:
-                ara_num_tmp -= ara
-                rom_num += ara2rom[ara]
-                break
+        num_arab += rom2ara[num_rome_temp]
     
-    return rom_num
+    return num_arab
 
-ara_num_sum = rome2arabian(rom_num1) + rome2arabian(rom_num2)
-rom_num_sum = arabian2rome(ara_num_sum)
-print(ara_num_sum)
-print(rom_num_sum)
+
+def arabian_to_rome(num_arab):
+    num_rome = ''
+    for ara in aras[::-1]:
+        while num_arab >= ara:
+            num_arab -= ara
+            num_rome += ara2rom[ara]
+    return num_rome
+
+
+if __name__ == "__main__":
+    num_rome1 = deque(input())
+    num_rome2 = deque(input())
+
+    roms = ['I', 'IV', 'V', 'IX', 'X', 'XL', 'L', 'XC', 'C', 'CD', 'D', 'CM', 'M']
+    aras = [1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000]
+    rom2ara = {rom: ara for rom, ara in zip(roms, aras)}
+    ara2rom = {ara: rom for rom, ara in zip(roms, aras)}
+
+    sum_arab = rome_to_arabian(num_rome1) + rome_to_arabian(num_rome2)
+    sum_rome = arabian_to_rome(sum_arab)
+
+    print(sum_arab)
+    print(sum_rome)
