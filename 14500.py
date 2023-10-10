@@ -20,54 +20,17 @@ i번째 줄의 j번째 수는 위에서부터 i번째 칸, 왼쪽에서부터 j�
 첫째 줄에 테트로미노가 놓인 칸에 쓰인 수들의 합의 최댓값을 출력한다.
 """
 height, width = map(int, input().split())
-numbers = []
-for _ in range(height):
-    nums = list(map(int, input().split()))
-    numbers.append(nums)
+board = [list(map(int, input().split())) for _ in range(height)]
 
 
-tetrominos = [
-    [[0, 0], [1, 0], [2, 0], [3, 0]],
-    [[0, 0], [1, 0], [2, 0], [2, 1]],
-    [[0, 0], [1, 0], [2, 0], [1, 1]],
-    [[0, 0], [1, 0], [1, 1], [2, 1]],
-    [[0, 0], [1, 0], [0, 1], [1, 1]]
-]
-
-
-def rotate_coor(rotation, coor):
-    if rotation % 4 == 0:
-        rotated_coor = coor
-    elif rotation % 4 == 1:
-        rotated_coor = [-coor[1], coor[0]]
-    elif rotation % 4 == 2:
-        rotated_coor = [-coor[0], -coor[1]]
-    elif rotation % 4 == 3:
-        rotated_coor = [coor[1], -coor[0]]
-    return rotated_coor
-
-
-def max_tetromino_sum(numbers):
-    max_sum = 0
-    for h in range(height):
-        for w in range(width):
-            start_coor = [w, h]
-            for tetromino in tetrominos:
-                for rotation in range(4):
-                    rotated_tetromino = [[rotate_coor(rotation, coor)[0], rotate_coor(rotation, coor)[1]] for coor in tetromino]
-                    temp_sum = 0
-                    is_out = False
-                    for tetro_coor in rotated_tetromino:
-                        new_coor = [start_coor[0]+tetro_coor[0], start_coor[1]+tetro_coor[1]]
-                        if new_coor[0] < width and new_coor[1] < height:
-                            temp_sum += numbers[new_coor[1]][new_coor[0]]
-                        else:
-                            break
-                    if is_out:
-                        continue
-                    else:
-                        max_sum = temp_sum if temp_sum > max_sum else max_sum
-    return max_sum
-
-
-print(max_tetromino_sum(numbers))
+def tetro_dfs(x, y, board, visited, tetro_sum, tetro_num):
+    deltas = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+    for dx, dy in deltas:
+        nx, ny = x + dx, y + dy
+        if visited[ny][nx]:
+            continue
+        visited[ny][nx] = True
+        tetro_sum += board[ny][nx]
+        tetro_num += 1
+        if tetro_num == 4:
+            pass
